@@ -1,6 +1,6 @@
 import SearchBar from "../SearchBar/SearchBar";
 import "./App.module.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchMovies } from "../../services/movieService";
 import type { Movie } from "../../types/movie";
 import toast, { Toaster } from "react-hot-toast";
@@ -8,29 +8,39 @@ import MovieGrid from "../MovieGrid/MovieGrid";
 import Loader from "../Loader/Loader";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import MovieModal from "../MovieModal/MovieModal";
+import { useQuery } from "@tanstack/react-query";
+//pagination
+// import ReactPaginateModule from "react-paginate";
+// import type { ReactPaginateProps } from "react-paginate";
+// import type { ComponentType } from "react";
+
+// type ModuleWithDefault<T> = { default: T };
+
+// const ReactPaginate = (
+//   ReactPaginateModule as unknown as ModuleWithDefault<ComponentType<ReactPaginateProps>>
+// ).default;
 
 const App = () => {
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [query, setQuery] = useState("");
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  const handleSearch = async (query: string) => {
-    setError(false); //added setError(false) so the state error resets before a new request
-    setMovies([]); // resets before a new search
-    try {
-      setLoading(true);
-      const data = await fetchMovies(query);
-      if (data.length === 0) {
-        toast.error("No movies found for your request.");
-      }
-      setMovies(data);
-    } catch {
-      setError(true);
-    } finally {
-      setLoading(false); // removed setLoading from try since in finally, it will work in any case
-    }
+  const {
+    data: movies = [],
+    isError,
+    isLoading,
+  } = useQuery({
+    queryKey: ["movies", query],
+    queryFn: () => fetchMovies(query),
+    enabled: query !== "",
+  });
+  const handleSearch = (newQuery: string) => {
+    setQuery(newQuery);
   };
+  useEffect(() => {
+    if (!isError && !isLoading && query !== "" && movies.length === 0) {
+      toast.error("No movies found for your request.");
+    }
+  }, [movies, query, isLoading, isError]);
   const openModalSelect = (movie: Movie) => {
     setSelectedMovie(movie);
   };
@@ -40,8 +50,9 @@ const App = () => {
 
   return (
     <>
-      <SearchBar onSubmit={handleSearch} />;{loading && <Loader />}
-      {error && <ErrorMessage />}
+      <SearchBar onSubmit={handleSearch} />
+      {isLoading && <Loader />}
+      {isError && <ErrorMessage />}
       <Toaster />
       {movies.length > 0 && (
         <MovieGrid onSelect={openModalSelect} movies={movies} />

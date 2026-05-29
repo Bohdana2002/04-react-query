@@ -9,7 +9,6 @@ interface MovieResponse {
   total_pages: number;
   total_results: number;
 }
-//fixed mistake - added interface + added <MovieResponce>
 
 export const fetchMovies = async (query: string): Promise<Movie[]> => {
   const { data } = await axios.get<MovieResponse>("/movie", {
