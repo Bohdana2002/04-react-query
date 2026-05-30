@@ -54,8 +54,6 @@ const App = () => {
   return (
     <>
       <SearchBar onSubmit={handleSearch} />
-      {isLoading && <Loader />}
-      {isError && <ErrorMessage />}
       {totalPages > 1 && (
         <ReactPaginate
           pageCount={totalPages}
@@ -69,6 +67,8 @@ const App = () => {
           previousLabel="←"
         />
       )}
+      {isLoading && <Loader />}
+      {isError && <ErrorMessage />}
       <Toaster />
       {movies.length > 0 && (
         <MovieGrid onSelect={openModalSelect} movies={movies} />
