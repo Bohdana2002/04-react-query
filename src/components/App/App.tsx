@@ -38,6 +38,7 @@ const App = () => {
 
   const handleSearch = (newQuery: string) => {
     setQuery(newQuery);
+    setCurrentPage(1); //here fixed: аби номер сторінки скидався до 1 коли юзер надсилає новий запит
   };
   useEffect(() => {
     if (!isError && !isLoading && query !== "" && movies.length === 0) {
