@@ -10,12 +10,15 @@ interface MovieResponse {
   total_results: number;
 }
 
-export const fetchMovies = async (query: string): Promise<Movie[]> => {
+export const fetchMovies = async (
+  query: string,
+  page: number,
+): Promise<MovieResponse> => {
   const { data } = await axios.get<MovieResponse>("/movie", {
-    params: { query },
+    params: { query, page },
     headers: {
       Authorization: `Bearer ${import.meta.env.VITE_TMDB_TOKEN}`,
     },
   });
-  return data.results;
+  return data;
 };
